@@ -1,0 +1,7 @@
+# requirements.txt
+requests
+paramiko
+python-decouple==3.1
+click
+rich
+pytest

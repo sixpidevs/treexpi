@@ -1,0 +1,2 @@
+[console_scripts]
+netspresso = netspresso.cli:main
