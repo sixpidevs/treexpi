@@ -1,11 +1,26 @@
-# Netspresso Cloudflare Module
+## Introduction Netspresso
+Welcome to the Netspresso project! This innovative tool automates the exposure of services on the internet, leveraging Python, Cloudflare, and the 'sish' library for efficient tunneling.
 
-## Descripción
-El módulo Cloudflare de Netspresso es una herramienta diseñada para facilitar la interacción con la API de Cloudflare. Permite realizar operaciones como listar zonas, crear y eliminar registros DNS de manera programática, simplificando la gestión de recursos de Cloudflare a través de un sencillo conjunto de comandos Python.
+## Project Participants
+- **Sergio Conejero**: DevOps engineer, skilled in Docker, Kubernetes, GCP, scripting, and networks.
+- **Edgar Espinosa**: Junior developer and data analyst, focused on Python and Java.
+- **Esteban Escobar**: Frontend developer, experienced in Python, JavaScript, TypeScript, NodeJs, VueJs.
 
-## Estructura del Proyecto
+
+### Cloudflare Module
+#### Description
+Python module for managing Cloudflare streamlines interactions with its API, enabling automated, programmatic operations like zone listing and DNS record management. It simplifies Cloudflare resource administration through user-friendly Python commands, enhancing efficiency and accessibility for developers working with Cloudflare services
+
+
+### Sish Module
+#### Description
+'sish' is an open-source alternative to tools like serveo and ngrok, designed for secure tunneling. It facilitates exposing local servers to the internet, often used in development and testing. It's highly configurable, supporting SSH and HTTP(S) protocols, and can be deployed using Docker
+
+
+### Project Structure
 
 ```
+# Netspresso Project
 netspresso/
 │
 ├── cloudflare/
@@ -18,58 +33,92 @@ netspresso/
 │ │
 │ ├── .env
 │ └── requirements.txt
-└── ejecutar_cloudflare.sh
+└── sish-lib
+├── docker-server-test/
 ```
 
 
-## Configuración
+### Netspresso server configuration
+#### Prerequisites
+- Have a own domain (example.com)
+- Link domain with Cloudflare
 
-### Requisitos
 
+#### Requirements
+- Docker
+- Docker compose
 - Python 3.6+
-- Pip (Gestor de paquetes de Python)
+- Pip (Python package manager)
 
-### Instalación
+#### Server Installation
+0. Create on-premise or cloud server with nat with public ip.
+1. Clone the repository in the server: `git clone [https://github.com/sixpidevs/treexpi-netspresso]`
+2. Navigate to the project directory: `cd sish-lib`
+3. Create ssh server running the docker image
 
-1. Clona el repositorio:
+    - ```bash
+      docker run -itd --name sish \
+        -v ~/sish/ssl:/ssl \
+        -v ~/sish/keys:/keys \
+        -v ~/sish/pubkeys:/pubkeys \
+        --net=host antoniomika/sish:latest \
+        --ssh-address=:22 \
+        --http-address=:80 \
+        --https-address=:443 \
+        --https=true \
+        --https-certificate-directory=/ssl \
+        --authentication-keys-directory=/pubkeys \
+        --private-keys-directory=/keys \
+        --bind-random-ports=false
+      ```
+4. Navigate to the project directory: `cd cloudflare`
+5. Install dependencies: `pip install -r cloudflare/requirements.txt`
+6. Set up the required environment variables in the `.env` file.
+7. Add DNS A record in you domain to use the public ip of this server. 
 
-`git clone [URL del repositorio]`
 
-2. Navega al directorio del proyecto:
+### Client use
+#### Prerequisites
+Only ssh client
 
-`cd netspresso`
+#### Exposing a Local HTTP Server
+To expose a local HTTP server, run:
 
-3. Instala las dependencias:
-
-`pip install -r cloudflare/requirements.txt`
-
-
-### Configuración de Variables de Entorno
-
-1. Crea un archivo `.env` en el directorio `cloudflare/` con las siguientes variables:
-
+ssh -R 80:localhost:8080 sish@<your-netspresso-server>
 ```
-CLOUDFLARE_API_KEY=[tu_api_key_aquí]
-CLOUDFLARE_EMAIL=[tu_email_aquí]
+
+#### Exposing a Local HTTPS Server
+For a local HTTPS server:
+```bash
+ssh -R 443:localhost:8443 sish@<your-netspresso-server>
 ```
 
-Reemplaza `[tu_api_key_aquí]` y `[tu_email_aquí]` con tus credenciales de Cloudflare.
+#### Custom Subdomain
+To use a custom subdomain:
+```bash
+ssh -R yoursubdomain:80:localhost:8080 sish@<your-netspresso-server>
+```
 
-## Uso
+#### Listing Active Tunnels
+To list all active tunnels:
+```bash
+ssh sish@<your-netspresso-server> -t list
+```
 
-Para ejecutar el módulo Cloudflare y realizar operaciones con la API, utiliza el script `ejecutar_cloudflare.sh` en la raíz del proyecto. Este script configura el entorno y ejecuta el módulo principal.
+#### Closing a Tunnel
+To close a specific tunnel:
+```bash
+ssh sish@<your-netspresso-server> -t close <tunnel-id>
+```
 
-## Pruebas
-
-Para ejecutar las pruebas unitarias, asegúrate de estar en el directorio raíz del proyecto y ejecuta:
-
-`python -m unittest cloudflare/tests/test_cloudflare`
+Replace `<your-netspresso-server>` with your sish server's address and `<tunnel-id>` with the ID of the tunnel you want to close.
 
 
-## Contribuciones
 
-Las contribuciones al proyecto son bienvenidas. Por favor, asegúrate de seguir las mejores prácticas de desarrollo y mantener el código bien documentado.
+## Contributions
 
-## Licencia
+Contributions to the project are welcome. Please make sure to follow best development practices and keep the code well documented.
+
+## Licence
 
 MIT
